@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+
+<BaseLayout title="About — Neon Forge" description="Kenalan dengan tim kecil di balik Neon Forge dan bagaimana kami meracik cerita teknologi masa depan.">
+  <header class="shell">
+    <SiteNav />
+  </header>
+
+  <main class="shell about-shell">
+    <section class="about-hero">
+      <h1>Tentang Neon Forge</h1>
+      <p>
+        Neon Forge lahir dari kreativitas para builder yang gemar mengotak-atik desain, performa, dan storytelling. Kami memadukan pendekatan eksperimental dengan disiplin engineering agar setiap rilis terasa futuristik, namun tetap bisa dinikmati semua orang.
+      </p>
+      <p>
+        Di sini kami menulis catatan proses, membedah komponen UI, dan berbagi eksperimen yang terjadi di balik layar saat membuat pengalaman web yang menyala. Semua artikel kami simpan dalam format Markdown supaya alur kerja tetap ringan dan mudah berkolaborasi.
+      </p>
+    </section>
+
+    <section class="about-grid">
+      <article class="about-card">
+        <h2>Nilai utama</h2>
+        <p>Prinsip yang kami pegang ketika merancang pengalaman digital.</p>
+        <ul>
+          <li>Kecepatan tanpa kompromi terhadap estetika dan aksesibilitas.</li>
+          <li>Eksperimen terukur dengan umpan balik nyata dari pembaca.</li>
+          <li>Transparansi proses supaya komunitas bisa belajar bersama.</li>
+        </ul>
+      </article>
+      <article class="about-card">
+        <h2>Ritme kerja</h2>
+        <p>Bagaimana kami menjaga update tetap relevan setiap minggunya.</p>
+        <ul>
+          <li>Kurasi topik berdasar isu yang sedang hangat di dunia desain & dev.</li>
+          <li>Prototyping cepat di Astro, dilanjutkan dokumentasi di Markdown.</li>
+          <li>Review silang sebelum terbit untuk memastikan kualitas dan konteks.</li>
+        </ul>
+      </article>
+      <article class="about-card">
+        <h2>Kolaborasi</h2>
+        <p>Neon Forge terbuka untuk kontributor dan brand yang selaras.</p>
+        <ul>
+          <li>Guest post dipersilakan selama membawa insight praktis.</li>
+          <li>Eksperimen produk & teknologi dipublikasikan secara jujur.</li>
+          <li>Hubungi kami di <a href="mailto:hello@neonforge.dev">hello@neonforge.dev</a> untuk diskusi lebih lanjut.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="about-mission">
+      <h2>Misi kami</h2>
+      <p>
+        Kami percaya masa depan web dibangun oleh kreator yang berani bereksperimen sekaligus menghormati pengguna. Karena itu setiap artikel di Neon Forge menghadirkan panduan implementasi nyata, checklist kesiapan produksi, dan catatan personal yang membantu pembaca mempercepat proses kreatifnya sendiri.
+      </p>
+      <blockquote>
+        "Teknologi yang terasa magis tercipta dari keseimbangan antara detail kecil dan visi besar." — Crew Neon Forge
+      </blockquote>
+      <p>
+        Ikuti terus blog ini bila kamu ingin mengasah insting kreatif, menjaga kestabilan performa, dan memadukan keduanya dalam pengalaman digital yang memikat.
+      </p>
+    </section>
+  </main>
+
+  <SiteFooter />
+</BaseLayout>

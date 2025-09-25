@@ -1,16 +1,177 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getCollection } from 'astro:content';
+import { estimateReadingTime } from '../utils/readingTime';
 
+const featureHighlights = [
+  {
+    title: 'Instant Insights',
+    description: 'Command palette search powered by intelligent indexing keeps readers in flow.',
+    icon: '⚡'
+  },
+  {
+    title: 'Adaptive Theming',
+    description: 'Black and orange palettes auto-tune for your environment, day or night.',
+    icon: '🌓'
+  },
+  {
+    title: 'Realtime Reactions',
+    description: 'Spark conversations with live comments, reactions, and share-friendly cards.',
+    icon: '💬'
+  }
+];
+
+const rawPosts = await getCollection('blog');
+const posts = rawPosts
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .map((post) => ({
+    slug: post.slug,
+    title: post.data.title,
+    excerpt: post.data.description,
+    formattedDate: post.data.publishDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    }),
+    tags: post.data.tags,
+    readingTime: post.data.readingTime ?? estimateReadingTime(post.body),
+    searchText: [post.data.title, post.data.description, post.data.tags.join(' ')].join(' ').toLowerCase()
+  }));
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout>
+  <header class="shell">
+    <SiteNav />
+
+    <section class="hero">
+      <div class="hero-content">
+        <p class="eyebrow">tech insights • motion crafted</p>
+        <h1>
+          Illuminate the future<br />
+          of digital experience
+        </h1>
+        <p class="intro">
+          Dive into deep dives on design systems, performance engineering, and the craft of immersive storytelling. Curated by builders who ship fast and polish relentlessly.
+        </p>
+        <div class="hero-actions">
+          <a class="primary" href="#latest">Start Reading</a>
+          <a class="ghost" href="#features">See Features</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="halo"></div>
+        <div class="pulse"></div>
+        <div class="stack">
+          <div class="chip">Astro Islands</div>
+          <div class="chip">React Interactivity</div>
+          <div class="chip">Sync Animations</div>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main class="shell">
+    <section class="features" id="features">
+      <h2>Experience engineered for momentum</h2>
+      <div class="feature-grid">
+        {featureHighlights.map((feature) => (
+          <article class="feature-card">
+            <div class="avatar" aria-hidden="true">{feature.icon}</div>
+            <div>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="latest" id="latest">
+      <div class="section-heading">
+        <div>
+          <h2>Latest transmissions</h2>
+          <p>Fresh knowledge drops every week, tuned for creators, founders, and curious technologists.</p>
+        </div>
+        <a class="ghost" href="#subscribe">Subscribe</a>
+      </div>
+
+      <div class="search-bar">
+        <label class="sr-only" for="site-search">Search articles</label>
+        <input
+          id="site-search"
+          type="search"
+          placeholder="Search by title, tag, or keyword"
+          autocomplete="off"
+          data-search-input
+        />
+      </div>
+      <p class="no-results" data-empty-state hidden>No transmissions match your search yet.</p>
+
+      <div class="post-grid" id="articles">
+        {posts.map((post) => (
+          <article class="post-card" data-search={post.searchText}>
+            <div class="post-meta">
+              <span>{post.formattedDate}</span>
+              {post.readingTime && <>
+                <span>•</span>
+                <span>{post.readingTime}</span>
+              </>}
+            </div>
+            <h3>{post.title}</h3>
+            <p>{post.excerpt}</p>
+            <div class="tag-row">
+              {post.tags.map((tag) => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+            <a class="read-more" href={`/blog/${post.slug}/`}>Read Article</a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="cta-block" id="subscribe">
+      <div class="cta-content">
+        <h2>Stay synced with the signal</h2>
+        <p>
+          Subscribe for tactical deep dives, code walkthroughs, and motion design tutorials delivered straight to your command center.
+        </p>
+      </div>
+      <form class="cta-form">
+        <input type="email" name="email" placeholder="you@domain.com" aria-label="Email address" />
+        <button type="submit">Join the feed</button>
+      </form>
+    </section>
+  </main>
+
+  <SiteFooter />
+
+  <script>
+    const searchInput = document.querySelector('[data-search-input]');
+    const cards = Array.from(document.querySelectorAll('.post-card'));
+    const emptyState = document.querySelector('[data-empty-state]');
+
+    const filterPosts = () => {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const haystack = card.dataset.search || '';
+        const match = !query || haystack.includes(query);
+        card.style.display = match ? '' : 'none';
+        if (match) {
+          visibleCount += 1;
+        }
+      });
+
+      if (emptyState) {
+        emptyState.hidden = visibleCount !== 0;
+      }
+    };
+
+    searchInput?.addEventListener('input', filterPosts);
+    filterPosts();
+  </script>
+</BaseLayout>

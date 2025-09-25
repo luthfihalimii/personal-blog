@@ -1,0 +1,28 @@
+---
+const author = {
+  name: 'Reza “Forge” Pratama',
+  role: 'Creative Technologist & Editor',
+  bio: 'Menyulam strategi desain, performa, dan motion menjadi pengalaman digital yang berani. Penulis utama Neon Forge dan penikmat kopi hitam.',
+  links: [
+    { label: 'X', href: 'https://x.com/neonforge' },
+    { label: 'GitHub', href: 'https://github.com/neonforge' },
+    { label: 'Newsletter', href: '/#subscribe' }
+  ]
+};
+---
+
+<section class="author-card">
+  <div>
+    <p class="author-label">Ditulis oleh</p>
+    <h2>{author.name}</h2>
+    <p class="author-role">{author.role}</p>
+    <p class="author-bio">{author.bio}</p>
+  </div>
+  <ul class="author-links">
+    {author.links.map((link) => (
+      <li>
+        <a href={link.href}>{link.label}</a>
+      </li>
+    ))}
+  </ul>
+</section>

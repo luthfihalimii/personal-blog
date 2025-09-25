@@ -1,0 +1,33 @@
+---
+const { pathname } = Astro.url;
+const isArticles = pathname === '/' || pathname.startsWith('/blog');
+const isArchive = pathname.startsWith('/archive');
+const isAbout = pathname.startsWith('/about');
+const exploreHref = pathname === '/' ? '#articles' : '/#articles';
+---
+
+<nav class="nav">
+  <div class="logo">
+    <span class="logo-mark">NF</span>
+    <span class="logo-type">Neon Forge</span>
+  </div>
+  <div class="nav-links">
+    <a class={`nav-link${isArticles ? ' active' : ''}`} href="/" aria-current={isArticles ? 'page' : undefined}>
+      Articles
+    </a>
+    <a class={`nav-link${isArchive ? ' active' : ''}`} href="/archive" aria-current={isArchive ? 'page' : undefined}>
+      Archive
+    </a>
+    <a class={`nav-link${isAbout ? ' active' : ''}`} href="/about" aria-current={isAbout ? 'page' : undefined}>
+      About
+    </a>
+  </div>
+  <div class="nav-actions">
+    <button class="command" type="button">
+      <span class="key">⌘</span>
+      <span class="key">K</span>
+      <span class="label">Quick Search</span>
+    </button>
+    <a class="cta" href={exploreHref}>Explore Articles</a>
+  </div>
+</nav>

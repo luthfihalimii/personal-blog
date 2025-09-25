@@ -1,0 +1,149 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getCollection } from 'astro:content';
+import { estimateReadingTime } from '../utils/readingTime';
+
+const rawPosts = await getCollection('blog');
+const posts = rawPosts
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .map((post) => ({
+    slug: post.slug,
+    title: post.data.title,
+    description: post.data.description,
+    formattedDate: post.data.publishDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    }),
+    year: post.data.publishDate.getFullYear(),
+    tags: post.data.tags,
+    readingTime: post.data.readingTime ?? estimateReadingTime(post.body),
+    searchText: [post.data.title, post.data.description, post.data.tags.join(' ')].join(' ').toLowerCase()
+  }));
+
+const tags = Array.from(new Set(posts.flatMap((post) => post.tags))).sort((a, b) => a.localeCompare(b));
+const postsByYear = posts.reduce<Record<string, typeof posts>>((acc, post) => {
+  const bucket = acc[post.year] ?? [];
+  bucket.push(post);
+  acc[post.year] = bucket;
+  return acc;
+}, {});
+const years = Object.keys(postsByYear)
+  .map((year) => Number(year))
+  .sort((a, b) => b - a);
+---
+
+<BaseLayout title="Archive — Neon Forge" description="Jelajahi arsip artikel Neon Forge lengkap dengan pencarian dan filter tag.">
+  <header class="shell">
+    <SiteNav />
+  </header>
+
+  <main class="shell archive-shell">
+    <section class="archive-hero">
+      <h1>Arsip Neon Forge</h1>
+      <p>
+        Seluruh eksperimen, studi kasus, dan insight yang pernah kami publikasikan ada di sini. Gunakan pencarian atau filter tag untuk menemukan artikel yang sesuai dengan fokusmu.
+      </p>
+    </section>
+
+    <section class="archive-controls">
+      <label class="sr-only" for="archive-search">Cari artikel</label>
+      <input
+        id="archive-search"
+        type="search"
+        placeholder="Cari judul atau kata kunci"
+        autocomplete="off"
+        data-archive-search
+      />
+      <div class="tag-filter" data-tag-picker>
+        <button class="tag-button active" type="button" data-tag="">Semua</button>
+        {tags.map((tag) => (
+          <button class="tag-button" type="button" data-tag={tag.toLowerCase()}>{tag}</button>
+        ))}
+      </div>
+    </section>
+
+    <section class="archive-list" data-archive-list>
+      {years.map((year) => (
+        <div class="archive-year" data-year-group>
+          <h2>{year}</h2>
+          <div class="archive-grid">
+            {postsByYear[year].map((post) => (
+              <article
+                class="archive-card"
+                data-search={post.searchText}
+                data-tags={post.tags.map((tag) => tag.toLowerCase()).join(' ')}
+              >
+                <p class="archive-meta">
+                  <span>{post.formattedDate}</span>
+                  <span>•</span>
+                  <span>{post.readingTime}</span>
+                  <span>•</span>
+                  <span>{post.tags.join(', ')}</span>
+                </p>
+                <h3>{post.title}</h3>
+                <p>{post.description}</p>
+                <a class="read-more" href={`/blog/${post.slug}/`}>Baca artikel</a>
+              </article>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <p class="no-results" data-archive-empty hidden>Tidak ada artikel yang cocok dengan filter saat ini.</p>
+  </main>
+
+  <SiteFooter />
+
+  <script>
+    const searchInput = document.querySelector('[data-archive-search]');
+    const tagButtons = Array.from(document.querySelectorAll('[data-tag-picker] .tag-button'));
+    const cards = Array.from(document.querySelectorAll('.archive-card'));
+    const emptyState = document.querySelector('[data-archive-empty]');
+
+    let activeTag = '';
+
+    const filterArchive = () => {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      let visibleCards = 0;
+
+      cards.forEach((card) => {
+        const haystack = card.dataset.search || '';
+        const tagHaystack = card.dataset.tags || '';
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesTag = !activeTag || tagHaystack.split(' ').includes(activeTag);
+        const show = matchesQuery && matchesTag;
+        card.style.display = show ? '' : 'none';
+        if (show) {
+          visibleCards += 1;
+        }
+      });
+
+      if (emptyState) {
+        emptyState.hidden = visibleCards !== 0;
+      }
+
+      const yearGroups = Array.from(document.querySelectorAll('[data-year-group]'));
+      yearGroups.forEach((group) => {
+        const hasVisible = Array.from(group.querySelectorAll('.archive-card')).some(
+          (card) => card.style.display !== 'none'
+        );
+        group.style.display = hasVisible ? '' : 'none';
+      });
+    };
+
+    tagButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        tagButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
+        activeTag = button.dataset.tag || '';
+        filterArchive();
+      });
+    });
+
+    searchInput?.addEventListener('input', filterArchive);
+    filterArchive();
+  </script>
+</BaseLayout>

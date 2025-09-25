@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import AuthorCard from '../../components/AuthorCard.astro';
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import { estimateReadingTime } from '../../utils/readingTime';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props as { post: CollectionEntry<'blog'> };
+
+const { Content } = await post.render();
+const { title, description, publishDate, readingTime, tags } = post.data;
+const formattedDate = publishDate.toLocaleDateString('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric'
+});
+const computedReadingTime = readingTime ?? estimateReadingTime(post.body);
+---
+
+<BaseLayout title={`${title} — Neon Forge`} description={description}>
+  <header class="shell">
+    <SiteNav />
+  </header>
+
+  <main class="shell article-shell">
+    <a class="back-link" href="/#articles">← Back to articles</a>
+    <article class="article-layout">
+      <header class="article-header">
+        <p class="article-meta">
+          <span>{formattedDate}</span>
+          {computedReadingTime && <>
+            <span>•</span>
+            <span>{computedReadingTime}</span>
+          </>}
+        </p>
+        <h1>{title}</h1>
+        {description && <p class="article-description">{description}</p>}
+        {tags.length > 0 && (
+          <div class="article-tags">
+            {tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </header>
+      <div class="article-content">
+        <Content />
+      </div>
+    </article>
+
+    <AuthorCard />
+  </main>
+
+  <SiteFooter />
+</BaseLayout>
